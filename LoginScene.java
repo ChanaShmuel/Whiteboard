@@ -35,7 +35,7 @@ public class LoginScene extends Scene {
 
     }
 
-    public interface LoginSceneListener{
+    public static interface LoginSceneListener{
         void onLogin(String username, String password);
     }
 }

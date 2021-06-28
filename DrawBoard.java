@@ -137,7 +137,7 @@ public class DrawBoard extends Rectangle {
 
     }
 
-    public interface Listener{
+    public static interface Listener{
         String getText();
         void doneText();
     }
