@@ -13,7 +13,6 @@ public class Main extends Application implements LoginScene.LoginSceneListener {
         primaryStage.setTitle("Whiteboard App");
         primaryStage.setScene(new LoginScene(this));
         primaryStage.show();
-        //test
     }
 
 

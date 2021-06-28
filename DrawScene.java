@@ -30,9 +30,30 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
         });
         bar.getChildren().add(colorPicker);
 
+        //point:
+        Button btnShapePoint = new Button("draw point");
+        btnShapePoint.setOnAction(actionEvent -> {
+            drawBoard.setShape(DrawBoard.POINT);
+        });
+        bar.getChildren().add(btnShapePoint);
+
+
+        //line:
+        Button btnShapeLine = new Button("draw line");
+        btnShapeLine.setOnAction(actionEvent -> {
+            drawBoard.setShape(DrawBoard.LINE);
+        });
+        bar.getChildren().add(btnShapeLine);
+
+
         class MyButton extends Button{
             public MyButton(String path, int action){
-                super(path);
+                //super(name);
+                BackgroundImage backgroundImage = new BackgroundImage( new Image( getClass().getResource(path).toExternalForm()),
+                        BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+                        BackgroundPosition.CENTER, BackgroundSize.DEFAULT);
+                Background background = new Background(backgroundImage);
+                this.setBackground(background);
                 this.setBorder(new Border(new BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, null, BorderStroke.THIN)));
                 this.setMinHeight(40);
                 this.setMinWidth(40);
@@ -43,10 +64,22 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
             }
         }
 
-        new MyButton("rectangle", DrawBoard.RECTANGLE);
-        new MyButton("ellips", DrawBoard.Ellipse);
-        new MyButton("line", DrawBoard.LINE);
-        new MyButton("point", DrawBoard.POINT);
+        //rectangle:
+        new MyButton("/img_rectangle.jpeg", DrawBoard.RECTANGLE);
+
+
+
+        /*
+        Button btnShapeRectangle = new Button("rectangle");
+        btnShapeRectangle.setOnAction(actionEvent -> {
+            drawBoard.setShape(DrawBoard.RECTANGLE);
+        });
+        bar.getChildren().add(btnShapeRectangle);
+        */
+
+
+
+
 
 
         //text field:
