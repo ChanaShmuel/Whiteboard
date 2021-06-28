@@ -1,7 +1,7 @@
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-//Application, Stage, Scene
+
 
 public class Main extends Application implements LoginScene.LoginSceneListener {
 
@@ -11,7 +11,8 @@ public class Main extends Application implements LoginScene.LoginSceneListener {
     public void start(Stage primaryStage) throws Exception{
         this.primaryStage = primaryStage;
         primaryStage.setTitle("Whiteboard App");
-        primaryStage.setScene(new LoginScene(this));
+        //primaryStage.setScene(new LoginScene(this));
+        primaryStage.setScene(new DrawScene("elad", "qwe123"));
         primaryStage.show();
     }
 

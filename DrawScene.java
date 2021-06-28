@@ -1,17 +1,23 @@
+import javafx.collections.ObservableList;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+
+import java.util.Random;
 
 public class DrawScene extends Scene implements DrawBoard.Listener {
 
     private TextField textField;
     private DrawBoard drawBoard;
     private final String username, password;
+
 
     public DrawScene(String username, String password){
         super(new Group(), 600, 400);
@@ -28,57 +34,63 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
         colorPicker.setOnAction(actionEvent -> {
             drawBoard.setColor(colorPicker.getValue());
         });
+        colorPicker.setMinHeight(42);
         bar.getChildren().add(colorPicker);
 
-        //point:
-        Button btnShapePoint = new Button("draw point");
-        btnShapePoint.setOnAction(actionEvent -> {
-            drawBoard.setShape(DrawBoard.POINT);
-        });
-        bar.getChildren().add(btnShapePoint);
 
-
-        //line:
-        Button btnShapeLine = new Button("draw line");
-        btnShapeLine.setOnAction(actionEvent -> {
-            drawBoard.setShape(DrawBoard.LINE);
-        });
-        bar.getChildren().add(btnShapeLine);
-
-
-        class MyButton extends Button{
-            public MyButton(String path, int action){
-                //super(name);
-                BackgroundImage backgroundImage = new BackgroundImage( new Image( getClass().getResource(path).toExternalForm()),
-                        BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
-                        BackgroundPosition.CENTER, BackgroundSize.DEFAULT);
-                Background background = new Background(backgroundImage);
-                this.setBackground(background);
+        //local inner class
+        class BarButton extends Button{
+            public BarButton(String path){
+                Image img = new Image(path);
+                ImageView view = new ImageView(img);
+                view.setPreserveRatio(true);
+                this.setGraphic(view);
                 this.setBorder(new Border(new BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, null, BorderStroke.THIN)));
-                this.setMinHeight(40);
-                this.setMinWidth(40);
-                this.setOnAction(actionEvent -> {
-                    drawBoard.setShape(action);
-                });
+                this.setMinHeight(42);
+                this.setMinWidth(42);
                 bar.getChildren().add(this);
             }
         }
 
-        //rectangle:
-        new MyButton("/img_rectangle.jpeg", DrawBoard.RECTANGLE);
+        class ShapeButton extends BarButton {
+            public ShapeButton(String path, int action){
+                super(path);
+                this.setOnAction(actionEvent -> {
+                    drawBoard.setShape(action);
+                });
+            }
+        }
+
+        new ShapeButton("icon/rectangle.png", DrawBoard.RECTANGLE);
+        new ShapeButton("icon/ellipse.png", DrawBoard.Ellipse);
+        new ShapeButton("icon/line.png", DrawBoard.LINE);
+        new ShapeButton("icon/point.png", DrawBoard.POINT);
+        BarButton btnUndo = new BarButton("icon/point.png");
+        btnUndo.setOnAction(actionEvent -> {
+            if(root.getChildren().size() > 2) {
+
+                /*
+                root.getChildren().clear();
+                root.getChildren().add(bar);
+                root.getChildren().add(drawBoard);
+                */
+
+                ObservableList<Node> l = root.getChildren();
+                l.remove(l.size()-1);
+                l.add(0, new Button());
+                l.remove(0);
 
 
+                /*
+                Button stam = new Button();
+                stam.setVisible(false);
+                ObservableList<Node> l = root.getChildren();
+                l.add(2, stam);
+                l.remove(l.size() - 1);
+                */
 
-        /*
-        Button btnShapeRectangle = new Button("rectangle");
-        btnShapeRectangle.setOnAction(actionEvent -> {
-            drawBoard.setShape(DrawBoard.RECTANGLE);
+            }
         });
-        bar.getChildren().add(btnShapeRectangle);
-        */
-
-
-
 
 
 
@@ -88,6 +100,7 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
         textField.setOnMouseClicked(mouseEvent -> {
             drawBoard.setShape(DrawBoard.TEXT);
         });
+        textField.setMinHeight(42);
 
 
 
