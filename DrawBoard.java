@@ -13,7 +13,7 @@ import javafx.scene.text.Text;
 public class DrawBoard extends Rectangle {
 
     // limits of the board
-    private static final int LIMIT_X = 5;
+    private static final int MARGIN = 5;
     private static final int LIMIT_Y = 50;
 
     private ObservableList<Node> list;
@@ -91,10 +91,10 @@ public class DrawBoard extends Rectangle {
 
 
     public void setDimensions(double width, double height){
-        this.setX(LIMIT_X);
+        this.setX(MARGIN);
         this.setY(LIMIT_Y); //MUST BE CONSTANT
-        this.setWidth(width - 5*2);
-        this.setHeight(height - this.getY() - LIMIT_X);
+        this.setWidth(width - MARGIN *2);
+        this.setHeight(height - this.getY() - MARGIN);
     }
 
     public void setColor(Color color) {
@@ -118,12 +118,12 @@ public class DrawBoard extends Rectangle {
             list.add(tempEllipse);
         }else {
 
-            if(x <= this.getWidth()+LIMIT_X &&
-                    (tempEllipse.getCenterX() - (x - tempEllipse.getCenterX())) >= LIMIT_X && //x - tempEllipse.getCenterX()  is tempEllipse.getRadiusX()
+            if(x <= this.getWidth()+ MARGIN &&
+                    (tempEllipse.getCenterX() - (x - tempEllipse.getCenterX())) >= MARGIN && //x - tempEllipse.getCenterX()  is tempEllipse.getRadiusX()
                     (tempEllipse.getCenterY() - (y - tempEllipse.getCenterY())) >= LIMIT_Y &&//y - tempEllipse.getCenterY()  is tempEllipse.getRadiusY()
                     y <= this.getHeight()+LIMIT_Y &&
                     y>=LIMIT_Y &&
-                    x>=LIMIT_X) {
+                    x>= MARGIN) {
                 tempEllipse.setRadiusX(x - tempEllipse.getCenterX());
                 tempEllipse.setRadiusY(y - tempEllipse.getCenterY());
             }
@@ -139,7 +139,7 @@ public class DrawBoard extends Rectangle {
             list.add(tempRectangle);
         }else{
             //make sure (x,y) is inside DrawBoard
-            if(x <= this.getWidth()+LIMIT_X && y <= this.getHeight()+LIMIT_Y && y>=LIMIT_Y && x>=LIMIT_X) {
+            if(x <= this.getWidth()+ MARGIN && y <= this.getHeight()+LIMIT_Y && y>=LIMIT_Y && x>= MARGIN) {
                 tempRectangle.setWidth(x - tempRectangle.getX());
                 tempRectangle.setHeight(y - tempRectangle.getY());
             }
@@ -167,7 +167,7 @@ public class DrawBoard extends Rectangle {
             list.add(tempLine);
         }else{
             //make sure (x,y) is inside DrawBoard
-            if(x <= this.getWidth()+LIMIT_X && y <= this.getHeight()+LIMIT_Y && y>=LIMIT_Y && x>=LIMIT_X) {
+            if(x <= this.getWidth()+ MARGIN && y <= this.getHeight()+LIMIT_Y && y>=LIMIT_Y && x>= MARGIN) {
                 tempLine.setEndX(x);
                 tempLine.setEndY(y);
             }

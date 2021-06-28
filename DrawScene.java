@@ -10,10 +10,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
-import java.util.Random;
 
 public class DrawScene extends Scene implements DrawBoard.Listener {
 
+    public static final int MIN_HEIGHT = 42;
     private TextField textField;
     private DrawBoard drawBoard;
     private final String username, password;
@@ -34,7 +34,7 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
         colorPicker.setOnAction(actionEvent -> {
             drawBoard.setColor(colorPicker.getValue());
         });
-        colorPicker.setMinHeight(42);
+        colorPicker.setMinHeight(MIN_HEIGHT);
         bar.getChildren().add(colorPicker);
 
 
@@ -46,8 +46,8 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
                 view.setPreserveRatio(true);
                 this.setGraphic(view);
                 this.setBorder(new Border(new BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, null, BorderStroke.THIN)));
-                this.setMinHeight(42);
-                this.setMinWidth(42);
+                this.setMinHeight(MIN_HEIGHT);
+                this.setMinWidth(MIN_HEIGHT);
                 bar.getChildren().add(this);
             }
         }
@@ -67,28 +67,14 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
         new ShapeButton("icon/point.png", DrawBoard.POINT);
         BarButton btnUndo = new BarButton("icon/point.png");
         btnUndo.setOnAction(actionEvent -> {
-            if(root.getChildren().size() > 2) {
-
-                /*
-                root.getChildren().clear();
-                root.getChildren().add(bar);
-                root.getChildren().add(drawBoard);
-                */
+            if(root.getChildren().size() > 2) {//2 is the bar and the DrawBoard(white rectangle)
 
                 ObservableList<Node> l = root.getChildren();
                 l.remove(l.size()-1);
+                //when removing the last node, for some reason, the scene doesn't get re-rendered.
+                //therefore, we force it to re-render:
                 l.add(0, new Button());
                 l.remove(0);
-
-
-                /*
-                Button stam = new Button();
-                stam.setVisible(false);
-                ObservableList<Node> l = root.getChildren();
-                l.add(2, stam);
-                l.remove(l.size() - 1);
-                */
-
             }
         });
 
@@ -100,7 +86,7 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
         textField.setOnMouseClicked(mouseEvent -> {
             drawBoard.setShape(DrawBoard.TEXT);
         });
-        textField.setMinHeight(42);
+        textField.setMinHeight(MIN_HEIGHT);
 
 
 
