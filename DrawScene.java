@@ -14,13 +14,15 @@ import javafx.scene.paint.Color;
 public class DrawScene extends Scene implements DrawBoard.Listener {
 
     public static final int MIN_HEIGHT = 42;
+    private final ServerInterface server;
     private TextField textField;
     private DrawBoard drawBoard;
     private final String username, password;
 
 
-    public DrawScene(String username, String password){
+    public DrawScene(String username, String password, ServerInterface server){
         super(new Group(), 600, 400);
+        this.server = server;
         this.username = username;
         this.password = password;
         Group root = (Group) this.getRoot();

@@ -63,8 +63,7 @@ public class DrawBoard extends Rectangle {
                 case PEN:
                     freeDraw(x, y);
                 default:
-                    System.out.println("unknown shape...");
-                    break;
+                    throw new RuntimeException("unknown shape...");
 
             }
 
@@ -112,18 +111,20 @@ public class DrawBoard extends Rectangle {
     private void drawEllipse(double x, double y){
         if (tempEllipse == null){
             tempEllipse = new Ellipse(x, y, 0, 0 );
-            tempEllipse.setMouseTransparent(true);
+            tempEllipse.setMouseTransparent(true);//transparent means it doesn't handle mouse events so the user cannot click on it.
+            //we want to allow geometries to overlap.
+
             tempEllipse.setStroke(color);
             tempEllipse.setFill(Color.TRANSPARENT);
             list.add(tempEllipse);
         }else {
-
-            if(x <= this.getWidth()+ MARGIN &&
+            boolean withinTheWhiteRectangle = x <= this.getWidth()+ MARGIN &&
                     (tempEllipse.getCenterX() - (x - tempEllipse.getCenterX())) >= MARGIN && //x - tempEllipse.getCenterX()  is tempEllipse.getRadiusX()
                     (tempEllipse.getCenterY() - (y - tempEllipse.getCenterY())) >= LIMIT_Y &&//y - tempEllipse.getCenterY()  is tempEllipse.getRadiusY()
                     y <= this.getHeight()+LIMIT_Y &&
                     y>=LIMIT_Y &&
-                    x>= MARGIN) {
+                    x>= MARGIN;
+            if(withinTheWhiteRectangle) {
                 tempEllipse.setRadiusX(x - tempEllipse.getCenterX());
                 tempEllipse.setRadiusY(y - tempEllipse.getCenterY());
             }
