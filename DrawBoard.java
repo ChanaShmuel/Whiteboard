@@ -8,6 +8,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
+import java.rmi.RemoteException;
 
 
 public class DrawBoard extends Rectangle {
@@ -15,6 +16,7 @@ public class DrawBoard extends Rectangle {
     // limits of the board
     private static final int MARGIN = 5;
     private static final int LIMIT_Y = 50;
+    private final ServerInterface server;
 
     private ObservableList<Node> list;
     private Color color;
@@ -30,10 +32,15 @@ public class DrawBoard extends Rectangle {
     private Line tempLine;
     private Rectangle tempRectangle;
     private Ellipse tempEllipse;
-    public DrawBoard(ObservableList<Node> list, Listener listener) {
+    private final String username, password;
+
+    public DrawBoard(ObservableList<Node> list, Listener listener, ServerInterface server, String username, String password) {
         this.listener = listener;
+        this.username = username;
+        this.password = password;
         shape = POINT;
         this.list = list;
+        this.server = server;
         this.setStroke(Color.DARKGRAY);
         this.setFill(Color.WHITE);
         registerToEvent();
@@ -81,9 +88,63 @@ public class DrawBoard extends Rectangle {
         });
         this.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
             //SEND TO SERVER
-            tempLine = null;
-            tempRectangle = null;
-            tempEllipse = null;
+            if(tempLine != null){
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        int id = 0;
+                        try {
+                            id = server.addShape(new double[]{
+                                    tempLine.getStartX(), tempLine.getStartY(),
+                                    tempLine.getEndX(), tempLine.getEndY()
+                            },color.toString(),"line", username, password);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                        tempLine.setId(String.valueOf(id));
+                        tempLine = null;
+                    }
+                }).start();
+
+            }
+            if(tempRectangle != null){
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        int id = 0;
+                        try {
+                            id = server.addShape(new double[]{
+                                    tempRectangle.getX(), tempRectangle.getY(),
+                                    tempRectangle.getWidth(), tempRectangle.getHeight()
+                            },color.toString(),"rectangle", username, password);
+                            tempRectangle.setId(String.valueOf(id));
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                        tempRectangle = null;
+                    }
+                }).start();
+
+            }
+            if(tempEllipse != null) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        int id = 0;
+                        try {
+                            id = server.addShape(new double[]{
+                                    tempEllipse.getCenterX(), tempEllipse.getCenterY(),
+                                    tempEllipse.getRadiusX(), tempEllipse.getRadiusY()
+                            },color.toString(),"ellipse", username, password);
+                            tempEllipse.setId(String.valueOf(id));
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                        tempEllipse = null;
+                    }
+                }).start();
+
+            }
         });
     }
 
@@ -157,12 +218,27 @@ public class DrawBoard extends Rectangle {
         c.setFill(color);
         list.add(c);
 
-        //SEND TO SERVER
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int id = 0;
+                try {
+                    id = server.addShape(new double[]{
+                            x,y
+                    },color.toString(),"point", username, password);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+                c.setId(String.valueOf(id));
+            }
+        }).start();
+
     }
 
     private void drawLine(double x, double y){
         if(tempLine == null){
             tempLine = new Line(x, y, x, y);
+            //MouseTransparent means ignoring click (not handling the event and passing it to the board behind them)
             tempLine.setMouseTransparent(true);
             tempLine.setStroke(color);
             list.add(tempLine);
@@ -179,14 +255,29 @@ public class DrawBoard extends Rectangle {
         String text = listener.getText();
         if(text == null || text.isEmpty())
             return;
-        Text t = new Text(text);
+        final Text t = new Text(text);
         t.setX(x);
         t.setY(y);
         t.setFill(color);
         list.add(t);
         listener.doneText();
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int id = 0;
+                try {
+                    id = server.addText(text, color.toString(), username, password);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+                t.setId(String.valueOf(id));
+            }
+        }).start();
+
+
     }
+
 
     public interface Listener {
         String getText();

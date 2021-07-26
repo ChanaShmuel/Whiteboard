@@ -2,9 +2,13 @@ import java.sql.*;
 
 public class DB {
 
-    public static final String URL_TO_MYSQL_DB = "jdbc:mysql://sql11.freemysqlhosting.net/sql11423204";
-    public static final String SQL_USERNAME = "sql11423204";
-    public static final String SQL_PASSWORD = "BDcmdUlWb4";
+    //public static final String URL_TO_MYSQL_DB = "jdbc:mysql://127.0.0.1/whiteboard";
+    //public static final String SQL_USERNAME = "root";
+    //public static final String SQL_PASSWORD = "qwe123";
+
+    public static String URL_TO_MYSQL_DB;
+    public static String SQL_USERNAME;
+    public static String SQL_PASSWORD;
 
     public static void query(String sql, SetPreparedStatement set, QueryListener listener){
         try {

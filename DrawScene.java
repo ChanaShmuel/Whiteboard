@@ -93,7 +93,7 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
 
 
         //draw board:
-        drawBoard = new DrawBoard(root.getChildren(), this);
+        drawBoard = new DrawBoard(root.getChildren(), this, server, username, password);
         drawBoard.setColor(initialColor);
         drawBoard.setDimensions(this.getWidth(), this.getHeight());
         root.getChildren().add(drawBoard);
