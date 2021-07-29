@@ -1,14 +1,15 @@
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Ellipse;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.*;
 import javafx.scene.text.Text;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class DrawBoard extends Rectangle {
@@ -16,6 +17,7 @@ public class DrawBoard extends Rectangle {
     // limits of the board
     private static final int MARGIN = 5;
     private static final int LIMIT_Y = 50;
+    public static final int POINT_RADIUS = 5;
     private final ServerInterface server;
 
     private ObservableList<Node> list;
@@ -44,8 +46,91 @@ public class DrawBoard extends Rectangle {
         this.setStroke(Color.DARKGRAY);
         this.setFill(Color.WHITE);
         registerToEvent();
+        getShapes();
     }
 
+
+    private void getShapes(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    List<ShapeData> shapeDataList = server.getShapes();
+                    final List<Shape> shapes = new ArrayList<>();
+                    for (int i = 0; i < shapeDataList.size(); i++) {
+                        ShapeData shapeData = shapeDataList.get(i);
+                        Shape shape = null;
+                        Color color;
+                        color = Color.web(shapeData.color);
+                        switch (shapeData.type){
+                            case "point":
+                                Circle circle = new Circle();
+                                circle.setCenterX(shapeData.coords[0]);
+                                circle.setCenterY(shapeData.coords[1]);
+                                circle.setRadius(POINT_RADIUS);
+                                circle.setFill(color);
+                                shape = circle;
+                                shapes.add(circle);
+                                break;
+                            case "line":
+                                Line line = new Line();
+                                line.setStartX(shapeData.coords[0]);
+                                line.setStartY(shapeData.coords[1]);
+                                line.setEndX(shapeData.coords[2]);
+                                line.setEndY(shapeData.coords[3]);
+                                line.setStroke(color);
+                                shape = line;
+                                shapes.add(line);
+                                break;
+                            case "rectangle":
+                                Rectangle rectangle = new Rectangle();
+                                rectangle.setX(shapeData.coords[0]);
+                                rectangle.setY(shapeData.coords[1]);
+                                rectangle.setWidth(shapeData.coords[2]);
+                                rectangle.setHeight(shapeData.coords[3]);
+                                rectangle.setStroke(color);
+                                rectangle.setFill(Color.TRANSPARENT);
+                                shape = rectangle;
+                                shapes.add(rectangle);
+                                break;
+                            case "text":
+                                Text text = new Text();
+                                text.setX(shapeData.coords[0]);
+                                text.setY(shapeData.coords[1]);
+                                text.setText(shapeData.text);
+                                text.setFill(color);
+                                shape = text;
+                                shapes.add(text);
+                                break;
+                            case "ellipse":
+                                Ellipse ellipse = new Ellipse();
+                                ellipse.setCenterX(shapeData.coords[0]);
+                                ellipse.setCenterY(shapeData.coords[1]);
+                                ellipse.setRadiusX(shapeData.coords[2]);
+                                ellipse.setRadiusY(shapeData.coords[3]);
+                                ellipse.setStroke(color);
+                                ellipse.setFill(Color.TRANSPARENT);
+                                shape = ellipse;
+                                shapes.add(ellipse);
+                                break;
+                            default:
+                                throw new RuntimeException("what is this shape?");
+                        }
+                        shape.setId(String.valueOf(shapeData.id));
+                    }
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            list.addAll(shapes);
+
+                        }
+                    });
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
 
     public void registerToEvent(){
 
@@ -89,65 +174,66 @@ public class DrawBoard extends Rectangle {
         this.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
             //SEND TO SERVER
             if(tempLine != null){
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        int id = 0;
-                        try {
-                            id = server.addShape(new double[]{
-                                    tempLine.getStartX(), tempLine.getStartY(),
-                                    tempLine.getEndX(), tempLine.getEndY()
-                            },color.toString(),"line", username, password);
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        }
-                        tempLine.setId(String.valueOf(id));
-                        tempLine = null;
-                    }
-                }).start();
-
+                sendShape(tempLine);
+                tempLine = null;
             }
             if(tempRectangle != null){
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        int id = 0;
-                        try {
-                            id = server.addShape(new double[]{
-                                    tempRectangle.getX(), tempRectangle.getY(),
-                                    tempRectangle.getWidth(), tempRectangle.getHeight()
-                            },color.toString(),"rectangle", username, password);
-                            tempRectangle.setId(String.valueOf(id));
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        }
-                        tempRectangle = null;
-                    }
-                }).start();
-
+                sendShape(tempRectangle);
+                tempRectangle = null;
             }
             if(tempEllipse != null) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        int id = 0;
-                        try {
-                            id = server.addShape(new double[]{
-                                    tempEllipse.getCenterX(), tempEllipse.getCenterY(),
-                                    tempEllipse.getRadiusX(), tempEllipse.getRadiusY()
-                            },color.toString(),"ellipse", username, password);
-                            tempEllipse.setId(String.valueOf(id));
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        }
-                        tempEllipse = null;
-                    }
-                }).start();
-
+                sendShape(tempEllipse);
+                tempEllipse = null;
             }
         });
     }
 
+
+    private void sendShape(Shape shape){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                double[] coords = null;
+                String type = null;
+                String textString = null;
+                if(shape instanceof Circle){
+                    Circle circle = (Circle)shape;
+                    coords = new double[]{circle.getCenterX(), circle.getCenterY()};
+                    type = "point";
+                }else if(shape instanceof Rectangle){
+                    Rectangle rectangle = (Rectangle) shape;
+                    coords = new double[]{rectangle.getX(), rectangle.getY(),
+                            rectangle.getWidth(), rectangle.getHeight()};
+                    type = "rectangle";
+                }else if(shape instanceof Ellipse){
+                    Ellipse ellipse = (Ellipse)shape;
+                    coords = new double[]{ellipse.getCenterX(), ellipse.getCenterY(),
+                            ellipse.getRadiusX(), ellipse.getRadiusY()};
+                    type = "ellipse";
+                }else if(shape instanceof Line){
+                    Line line = (Line) shape;
+                    coords = new double[]{line.getStartX(), line.getStartY(),
+                            line.getEndX(), line.getEndY()};
+                    type = "line";
+                }else if(shape instanceof Text){
+                    Text text = (Text) shape;
+                    textString = text.getText();
+                    coords = new double[]{text.getX(), text.getY()};
+                    type = "text";
+                }
+                else{
+                    throw new RuntimeException("unknown shape " + shape);
+                }
+                int id = 0;
+                try {
+                    id = server.addShape(coords,color.toString(),type, username, password, textString);
+                    shape.setId(String.valueOf(id));
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
 
 
     public void setDimensions(double width, double height){
@@ -214,25 +300,10 @@ public class DrawBoard extends Rectangle {
         Circle c = new Circle();
         c.setCenterX(x);
         c.setCenterY(y);
-        c.setRadius(5);
+        c.setRadius(POINT_RADIUS);
         c.setFill(color);
         list.add(c);
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int id = 0;
-                try {
-                    id = server.addShape(new double[]{
-                            x,y
-                    },color.toString(),"point", username, password);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-                c.setId(String.valueOf(id));
-            }
-        }).start();
-
+        sendShape(c);
     }
 
     private void drawLine(double x, double y){
@@ -262,18 +333,7 @@ public class DrawBoard extends Rectangle {
         list.add(t);
         listener.doneText();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int id = 0;
-                try {
-                    id = server.addText(text, color.toString(), username, password);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-                t.setId(String.valueOf(id));
-            }
-        }).start();
+        sendShape(t);
 
 
     }

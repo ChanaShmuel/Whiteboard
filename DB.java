@@ -35,6 +35,24 @@ public class DB {
         }
     }
 
+    public static int executeUpdateReturnGeneratedKeys(String sql, SetPreparedStatement set){
+        try(Connection conn = DriverManager.getConnection(URL_TO_MYSQL_DB, SQL_USERNAME, SQL_PASSWORD)) {
+            try (PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                set.set(statement);
+                if(statement.executeUpdate() > 0){
+                    try(ResultSet resultSet = statement.getGeneratedKeys()){
+                        if(resultSet.next()){
+                            return resultSet.getInt(1);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
     public static int update(String sql, SetPreparedStatement set){
         int rowsAffected = 0;
         try {

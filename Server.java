@@ -1,13 +1,13 @@
+import javax.sql.rowset.serial.SerialBlob;
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 
 public class Server implements ServerInterface{
@@ -105,20 +105,62 @@ public class Server implements ServerInterface{
     }
 
     @Override
-    public int addShape(double[] coords, String color, String type, String username, String password) throws RemoteException {
+    public int addShape(double[] coords, String color, String type, String username, String password, String text) throws RemoteException {
         if(!login(username,password))
             return -1;
-
-        return 0;
+        int id = DB.executeUpdateReturnGeneratedKeys("insert into shapes(geometry,username,type,color,text) VALUES (?,?,?,?,?)", statement -> {
+            SerialBlob blob = new SerialBlob(doubleArrayToByteArray(coords));
+            statement.setBlob(1, blob);
+            statement.setString(2, username);
+            statement.setString(3, type);
+            statement.setString(4, color);
+            statement.setString(5, text);
+        });
+        return id;
     }
 
     @Override
-    public int addText(String text, String color, String username, String password) throws RemoteException {
-        if(!login(username,password))
-            return -1;
-
-        return 0;
+    public List<ShapeData> getShapes()  throws RemoteException{
+        final List<ShapeData> shapes = new ArrayList<>();
+        DB.query("SELECT geometry,username,type,color,text,id FROM shapes", statement -> {},resultSet -> {
+            ShapeData shapeData = new ShapeData();
+            Blob blob = resultSet.getBlob(1);
+            SerialBlob serialBlob = new SerialBlob(blob);
+            shapeData.coords = byteArrayToDoubleArray(serialBlob.getBytes(1, (int) blob.length()));
+            shapeData.username = resultSet.getString(2);
+            shapeData.type = resultSet.getString(3);
+            shapeData.color = resultSet.getString(4);
+            if(shapeData.type.equals("text")){
+                shapeData.text = resultSet.getString(5);
+            }
+            shapeData.id = resultSet.getInt(6);
+            shapes.add(shapeData);
+        });
+        return shapes;
     }
+
+    public static byte[] doubleArrayToByteArray(double[] doubleArray){
+        byte[] result = new byte[doubleArray.length * 8];
+        int pos = 0;
+        for (int i = 0; i < doubleArray.length; i++) {
+            ByteBuffer.wrap(result).putDouble(pos, doubleArray[i]);
+            pos += 8;
+        }
+
+        return result;
+    }
+
+    public static double[] byteArrayToDoubleArray(byte[] byteArray){
+        double[] result = new double[byteArray.length / 8];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = ByteBuffer.wrap(byteArray).getDouble(i*8);
+        }
+        return result;
+    }
+
+
+
+
 
     public static class Container<T>{
         public T value;
