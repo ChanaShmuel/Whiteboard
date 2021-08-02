@@ -105,6 +105,12 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
     }
 
 
+    public void onStop(){
+        if (drawBoard != null) {
+            drawBoard.onStop();
+        }
+    }
+
     @Override
     public String getText() {
         return textField.getText();

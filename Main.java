@@ -1,5 +1,6 @@
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.rmi.NotBoundException;
@@ -52,5 +53,15 @@ public class Main extends Application implements LoginScene.LoginSceneListener {
             }
         });
 
+    }
+
+
+    @Override
+    public void stop() throws Exception {
+        Scene scene = primaryStage.getScene();
+        if(scene != null && scene instanceof DrawScene){
+            DrawScene drawScene = (DrawScene) scene;
+            drawScene.onStop();
+        }
     }
 }
