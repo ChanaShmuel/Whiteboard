@@ -41,7 +41,7 @@ public class Server implements ServerInterface{
                 byte[] buffer = new byte[256];
                 int nextByte;
                 int actuallyRead = -1;
-                while ((nextByte = inputStream.read()) != -1) {
+                while ((nextByte = inputStream.read()) != -1) {//-1 means end of stream
                     buffer[++actuallyRead] = (byte) nextByte;
                     if (actuallyRead == 255)
                         throw new RuntimeException("configuration file is too long");

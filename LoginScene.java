@@ -22,6 +22,8 @@ public class LoginScene extends Scene {
         super(new Group(), 400, 200);
         this.server = server;
         this.listener = listener;
+
+        //build GUI
         Group root = (Group) this.getRoot();
         VBox box = new VBox();
         box.setSpacing(10);
@@ -39,6 +41,7 @@ public class LoginScene extends Scene {
         btnLogin = new Button("login");
         lblMessage = new Label();
         box.getChildren().add(lblMessage);
+
         btnLogin.setOnAction(actionEvent -> {
             String username = txtUserName.getText();
             String password = txtPassword.getText();

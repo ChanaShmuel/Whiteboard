@@ -67,7 +67,7 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
         new ShapeButton("icon/ellipse.png", DrawBoard.Ellipse);
         new ShapeButton("icon/line.png", DrawBoard.LINE);
         new ShapeButton("icon/point.png", DrawBoard.POINT);
-        BarButton btnUndo = new BarButton("icon/point.png");
+        BarButton btnUndo = new BarButton("icon/undo.png");//this is UNDO
         btnUndo.setOnAction(actionEvent -> {
             if(root.getChildren().size() > 2) {//2 is the bar and the DrawBoard(white rectangle)
 
