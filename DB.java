@@ -10,6 +10,7 @@ public class DB {
     public static String SQL_USERNAME;
     public static String SQL_PASSWORD;
 
+    //this is for SELECT queries
     public static void query(String sql, SetPreparedStatement set, QueryListener listener){
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -35,13 +36,14 @@ public class DB {
         }
     }
 
+    //this is for INSERT... it returns the automatic id (auto-increment) of the new row
     public static int executeUpdateReturnGeneratedKeys(String sql, SetPreparedStatement set){
         try(Connection conn = DriverManager.getConnection(URL_TO_MYSQL_DB, SQL_USERNAME, SQL_PASSWORD)) {
             try (PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 set.set(statement);
                 if(statement.executeUpdate() > 0){
                     try(ResultSet resultSet = statement.getGeneratedKeys()){
-                        if(resultSet.next()){
+                        if(resultSet.next()){//we assume only one new row inserted, otherwise we need a while loop
                             return resultSet.getInt(1);
                         }
                     }
@@ -53,6 +55,7 @@ public class DB {
         return -1;
     }
 
+    //this is for non-select queries, for example: UPDATE, INSERT, DELETE..
     public static int update(String sql, SetPreparedStatement set){
         int rowsAffected = 0;
         try {

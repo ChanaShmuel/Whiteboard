@@ -30,6 +30,8 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
         HBox bar = new HBox();
         root.getChildren().add(bar);
 
+
+
         //color picker:
         ColorPicker colorPicker = new ColorPicker();
         colorPicker.setValue(initialColor);

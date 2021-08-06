@@ -42,9 +42,9 @@ public class Server implements ServerInterface{
                 int nextByte;
                 int actuallyRead = -1;
                 while ((nextByte = inputStream.read()) != -1) {//-1 means end of stream
-                    buffer[++actuallyRead] = (byte) nextByte;
                     if (actuallyRead == 255)
                         throw new RuntimeException("configuration file is too long");
+                    buffer[++actuallyRead] = (byte) nextByte;
                 }
                 if(actuallyRead > -1) {
                     String configurationString = new String(buffer, 0, actuallyRead+1);

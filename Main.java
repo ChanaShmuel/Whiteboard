@@ -58,6 +58,7 @@ public class Main extends Application implements LoginScene.LoginSceneListener {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
+                primaryStage.setTitle("Whiteboard " + username);
                 primaryStage.setScene(new DrawScene(username, password, server));
             }
         });
@@ -73,4 +74,7 @@ public class Main extends Application implements LoginScene.LoginSceneListener {
             drawScene.onStop();
         }
     }
+
+
+
 }
