@@ -25,32 +25,40 @@ public class LoginScene extends Scene {
 
         //build GUI
         Group root = (Group) this.getRoot();
+
+        // vbox to put the labels and text field and buttons
         VBox box = new VBox();
         box.setSpacing(10);
         box.setLayoutX(20);
         box.setPrefWidth(this.getWidth() - 20*2);
         //box.setAlignment(Pos.CENTER);
+
+        // username
         Label lblUserName = new Label("username:");
         box.getChildren().add(lblUserName);
         txtUserName = new TextField();
         txtUserName.setOnKeyPressed(keyEvent -> {
             if(keyEvent.getCode().getCode() == 10)
-                txtPassword.requestFocus();
+                txtPassword.requestFocus();  // if click enter move to password box
         });
         box.getChildren().add(txtUserName);
+
+        // password
         Label lblPassword = new Label("password:");
         box.getChildren().add(lblPassword);
         txtPassword = new PasswordField();
         txtPassword.setOnKeyPressed(keyEvent -> {
-            if(keyEvent.getCode().getCode() == 10)
+            if(keyEvent.getCode().getCode() == 10)   // if click enter it'll click on the login btn
                 login();
         });
         box.getChildren().add(txtPassword);
 
+        // hbox to put the two buttons login and signup one near the other
         HBox boxForButtons = new HBox();
 
-        boxForButtons.setSpacing(10);
+        boxForButtons.setSpacing(10);   // put spaces between the two buttons
 
+        // login
         btnLogin = new Button("login");
         lblMessage = new Label();
         box.getChildren().add(lblMessage);
@@ -60,7 +68,7 @@ public class LoginScene extends Scene {
         });
         boxForButtons.getChildren().add(btnLogin);
 
-
+        // signup
         btnSignup = new Button("signup");
         btnSignup.setOnAction(actionEvent -> {
             login(false);
