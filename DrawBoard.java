@@ -46,6 +46,7 @@ public class DrawBoard extends Rectangle {
         this.server = server;
         this.setStroke(Color.DARKGRAY);
         this.setFill(Color.WHITE);
+        list.add(this);
         registerToEvent();
         getShapes();
     }
@@ -81,6 +82,7 @@ public class DrawBoard extends Rectangle {
                                     line.setEndX(shapeData.coords[2]);
                                     line.setEndY(shapeData.coords[3]);
                                     line.setStroke(color);
+                                    line.setMouseTransparent(true);
                                     shape = line;
                                     shapes.add(line);
                                     break;
@@ -91,6 +93,7 @@ public class DrawBoard extends Rectangle {
                                     rectangle.setWidth(shapeData.coords[2]);
                                     rectangle.setHeight(shapeData.coords[3]);
                                     rectangle.setStroke(color);
+                                    rectangle.setMouseTransparent(true);
                                     rectangle.setFill(Color.TRANSPARENT);
                                     shape = rectangle;
                                     shapes.add(rectangle);
@@ -111,6 +114,7 @@ public class DrawBoard extends Rectangle {
                                     ellipse.setRadiusX(shapeData.coords[2]);
                                     ellipse.setRadiusY(shapeData.coords[3]);
                                     ellipse.setStroke(color);
+                                    ellipse.setMouseTransparent(true);
                                     ellipse.setFill(Color.TRANSPARENT);
                                     shape = ellipse;
                                     shapes.add(ellipse);
@@ -123,7 +127,14 @@ public class DrawBoard extends Rectangle {
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
-                                list.addAll(shapes);
+                                if(list.size() >= 2) {
+                                    Node bar = list.get(0);
+                                    Node drawBoard = list.get(1);
+                                    list.clear();
+                                    list.add(bar);
+                                    list.add(drawBoard); //we could have done: list.add(this) like in the constructor
+                                    list.addAll(shapes);
+                                }
 
                             }
                         });
