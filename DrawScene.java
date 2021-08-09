@@ -10,6 +10,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
+import java.rmi.RemoteException;
+
 
 public class DrawScene extends Scene implements DrawBoard.Listener {
 
@@ -73,12 +75,16 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
         btnUndo.setOnAction(actionEvent -> {
             if(root.getChildren().size() > 2) {//2 is the bar and the DrawBoard(white rectangle)
 
-                ObservableList<Node> l = root.getChildren();
-                l.remove(l.size()-1);
-                //when removing the last node, for some reason, the scene doesn't get re-rendered.
-                //therefore, we force it to re-render:
-                l.add(0, new Button());
-                l.remove(0);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            server.undo(username, password);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
             }
         });
 

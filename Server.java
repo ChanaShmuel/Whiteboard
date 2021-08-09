@@ -76,8 +76,14 @@ public class Server implements ServerInterface{
 
 
     @Override
-    public void foo() throws RemoteException {
-        System.out.println("in foo");
+    public void undo(String username, String password) throws RemoteException {
+        if(username == null || username.isEmpty() || password == null || password.isEmpty())
+            return;
+        DB.update("DELETE FROM shapes WHERE username=? AND id=(SELECT MAX(id) FROM (SELECT id FROM shapes WHERE username=?)tblTemp)",
+                statement -> {
+            statement.setString(1, username);
+            statement.setString(2, username);
+                });
     }
 
     @Override
