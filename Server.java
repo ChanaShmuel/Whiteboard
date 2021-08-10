@@ -79,6 +79,8 @@ public class Server implements ServerInterface{
     public void undo(String username, String password) throws RemoteException {
         if(username == null || username.isEmpty() || password == null || password.isEmpty())
             return;
+        if(!login(username,password))
+            return;
         DB.update("DELETE FROM shapes WHERE username=? AND id=(SELECT MAX(id) FROM (SELECT id FROM shapes WHERE username=?)tblTemp)",
                 statement -> {
             statement.setString(1, username);
