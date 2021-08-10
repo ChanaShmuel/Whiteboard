@@ -76,8 +76,14 @@ public class Server implements ServerInterface{
 
 
     @Override
-    public void foo() throws RemoteException {
-        System.out.println("in foo");
+    public void undo(String username, String password) throws RemoteException {
+        if(username == null || username.isEmpty() || password == null || password.isEmpty())
+            return;
+        DB.update("DELETE FROM shapes WHERE username=? AND id=(SELECT MAX(id) FROM (SELECT id FROM shapes WHERE username=?)tblTemp)",
+                statement -> {
+            statement.setString(1, username);
+            statement.setString(2, username);
+                });
     }
 
     @Override
@@ -93,17 +99,27 @@ public class Server implements ServerInterface{
 
     @Override
     public boolean login(String username, String password) throws RemoteException {
-
         if(username == null || username.isEmpty() || password == null || password.isEmpty())
             return false;
-        Container<String> stringContainer = new Container<>();
+        final Container<String> stringContainer = new Container<>();
+        DB.QueryListener queryListener = resultSet -> stringContainer.value = resultSet.getString(1);
         DB.query("SELECT password FROM users WHERE username=?",statement -> statement.setString(1, username),
-                resultSet -> stringContainer.value = resultSet.getString(1));
+                queryListener);
         String passwordFromDb = stringContainer.value;
-
         return passwordFromDb != null && passwordFromDb.equals(password);
     }
 
+    /**
+     *
+     * @param coords Geometry information of the shape, depends on the type of the shape
+     * @param color the color of the shape as hexadecimal
+     * @param type either ellipse, point, text, rectangle, line, etc.
+     * @param username the user created the shape
+     * @param password
+     * @param text relevant only if type is "text"
+     * @return the id of the newly inserted row.
+     * @throws RemoteException
+     */
     @Override
     public int addShape(double[] coords, String color, String type, String username, String password, String text) throws RemoteException {
         if(!login(username,password))
