@@ -1,6 +1,7 @@
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -37,9 +38,10 @@ public class DrawBoard extends Rectangle {
     private Ellipse tempEllipse;
     private final String username, password;
     private volatile boolean go = true;
-    private final AtomicBoolean isDrawing = new AtomicBoolean(false);//thread safe boolean
+    private final ColorPicker colorPicker;
+    private boolean isDrawing;
 
-    public DrawBoard(ObservableList<Node> list, Listener listener, ServerInterface server, String username, String password) {
+    public DrawBoard(ObservableList<Node> list, Listener listener, ServerInterface server, String username, String password, ColorPicker colorPicker) {
         this.listener = listener;
         this.username = username;
         this.password = password;
@@ -51,8 +53,8 @@ public class DrawBoard extends Rectangle {
         list.add(this);
         registerToEvent();
         getShapes();
-
-
+        this.colorPicker = colorPicker;
+        isDrawing = false;
     }
 
 
@@ -61,94 +63,95 @@ public class DrawBoard extends Rectangle {
             @Override
             public void run() {
                 while (go) {
-                    if(!isDrawing.get()) {
-                        try {
-                            List<ShapeData> shapeDataList = server.getShapes();
-                            final List<Shape> shapes = new ArrayList<>();
-                            for (int i = 0; i < shapeDataList.size(); i++) {
-                                ShapeData shapeData = shapeDataList.get(i);
-                                Shape shape = null;
-                                Color color;
-                                color = Color.web(shapeData.color);
-                                switch (shapeData.type) {
-                                    case "point":
-                                        Circle circle = new Circle();
-                                        circle.setCenterX(shapeData.coords[0]);
-                                        circle.setCenterY(shapeData.coords[1]);
-                                        circle.setRadius(POINT_RADIUS);
-                                        circle.setFill(color);
-                                        shape = circle;
-                                        shapes.add(circle);
-                                        break;
-                                    case "line":
-                                        Line line = new Line();
-                                        line.setStartX(shapeData.coords[0]);
-                                        line.setStartY(shapeData.coords[1]);
-                                        line.setEndX(shapeData.coords[2]);
-                                        line.setEndY(shapeData.coords[3]);
-                                        line.setStroke(color);
-                                        line.setMouseTransparent(true);
-                                        shape = line;
-                                        shapes.add(line);
-                                        break;
-                                    case "rectangle":
-                                        Rectangle rectangle = new Rectangle();
-                                        rectangle.setX(shapeData.coords[0]);
-                                        rectangle.setY(shapeData.coords[1]);
-                                        rectangle.setWidth(shapeData.coords[2]);
-                                        rectangle.setHeight(shapeData.coords[3]);
-                                        rectangle.setStroke(color);
-                                        rectangle.setMouseTransparent(true);
-                                        rectangle.setFill(Color.TRANSPARENT);
-                                        shape = rectangle;
-                                        shapes.add(rectangle);
-                                        break;
-                                    case "text":
-                                        Text text = new Text();
-                                        text.setX(shapeData.coords[0]);
-                                        text.setY(shapeData.coords[1]);
-                                        text.setText(shapeData.text);
-                                        text.setFill(color);
-                                        shape = text;
-                                        shapes.add(text);
-                                        break;
-                                    case "ellipse":
-                                        Ellipse ellipse = new Ellipse();
-                                        ellipse.setCenterX(shapeData.coords[0]);
-                                        ellipse.setCenterY(shapeData.coords[1]);
-                                        ellipse.setRadiusX(shapeData.coords[2]);
-                                        ellipse.setRadiusY(shapeData.coords[3]);
-                                        ellipse.setStroke(color);
-                                        ellipse.setMouseTransparent(true);
-                                        ellipse.setFill(Color.TRANSPARENT);
-                                        shape = ellipse;
-                                        shapes.add(ellipse);
-                                        break;
-                                    default:
-                                        throw new RuntimeException("what is this shape?");
-                                }
-                                shape.setId(String.valueOf(shapeData.id));
+                    try {
+                        List<ShapeData> shapeDataList = server.getShapes();
+                        final List<Shape> shapes = new ArrayList<>();
+                        for (int i = 0; i < shapeDataList.size(); i++) {
+                            ShapeData shapeData = shapeDataList.get(i);
+                            Shape shape = null;
+                            Color color;
+                            color = Color.web(shapeData.color);
+                            switch (shapeData.type) {
+                                case "point":
+                                    Circle circle = new Circle();
+                                    circle.setCenterX(shapeData.coords[0]);
+                                    circle.setCenterY(shapeData.coords[1]);
+                                    circle.setRadius(POINT_RADIUS);
+                                    circle.setFill(color);
+                                    shape = circle;
+                                    shapes.add(circle);
+                                    break;
+                                case "line":
+                                    Line line = new Line();
+                                    line.setStartX(shapeData.coords[0]);
+                                    line.setStartY(shapeData.coords[1]);
+                                    line.setEndX(shapeData.coords[2]);
+                                    line.setEndY(shapeData.coords[3]);
+                                    line.setStroke(color);
+                                    line.setMouseTransparent(true);
+                                    shape = line;
+                                    shapes.add(line);
+                                    break;
+                                case "rectangle":
+                                    Rectangle rectangle = new Rectangle();
+                                    rectangle.setX(shapeData.coords[0]);
+                                    rectangle.setY(shapeData.coords[1]);
+                                    rectangle.setWidth(shapeData.coords[2]);
+                                    rectangle.setHeight(shapeData.coords[3]);
+                                    rectangle.setStroke(color);
+                                    rectangle.setMouseTransparent(true);
+                                    rectangle.setFill(Color.TRANSPARENT);
+                                    shape = rectangle;
+                                    shapes.add(rectangle);
+                                    break;
+                                case "text":
+                                    Text text = new Text();
+                                    text.setX(shapeData.coords[0]);
+                                    text.setY(shapeData.coords[1]);
+                                    text.setText(shapeData.text);
+                                    text.setFill(color);
+                                    shape = text;
+                                    shapes.add(text);
+                                    break;
+                                case "ellipse":
+                                    Ellipse ellipse = new Ellipse();
+                                    ellipse.setCenterX(shapeData.coords[0]);
+                                    ellipse.setCenterY(shapeData.coords[1]);
+                                    ellipse.setRadiusX(shapeData.coords[2]);
+                                    ellipse.setRadiusY(shapeData.coords[3]);
+                                    ellipse.setStroke(color);
+                                    ellipse.setMouseTransparent(true);
+                                    ellipse.setFill(Color.TRANSPARENT);
+                                    shape = ellipse;
+                                    shapes.add(ellipse);
+                                    break;
+                                default:
+                                    throw new RuntimeException("what is this shape?");
                             }
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (list.size() >= 2 && !isDrawing.get()) {
-                                        Node bar = list.get(0);
-                                        Node drawBoard = list.get(1);
-                                        list.clear();
-                                        list.add(bar);
-                                        list.add(drawBoard); //we could have done: list.add(this) like in the constructor
-                                        list.addAll(shapes);
-                                    }
-
-                                }
-                            });
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
+                            shape.setId(String.valueOf(shapeData.id));
                         }
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (list.size() >= 2 && !isDrawing && !colorPicker.isFocused()) {
+                                    //Node bar = list.get(0);
+                                    //Node drawBoard = list.get(1);
+                                    while (list.size() > 2){
+                                        list.remove(2);
+                                    }
+                                    //list.clear();
+                                    //list.add(bar);
+                                    //list.add(drawBoard); //we could have done: list.add(this) like in the constructor
+                                    list.addAll(shapes);
+                                }
+
+                            }
+                        });
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
                     }
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(1000L);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -167,18 +170,18 @@ public class DrawBoard extends Rectangle {
                     drawPoint(x, y);
                     break;
                 case LINE:
-                    isDrawing.set(true);
+                    isDrawing = true;
                     drawLine(x, y);
                     break;
                 case TEXT:
                     drawText(x, y);
                     break;
                 case RECTANGLE:
-                    isDrawing.set(true);
+                    isDrawing = true;
                     drawRectangle(x, y);
                     break;
                 case Ellipse:
-                    isDrawing.set(true);
+                    isDrawing = true;
                     drawEllipse(x, y);
                     break;
                 case PEN:
@@ -212,7 +215,7 @@ public class DrawBoard extends Rectangle {
                 sendShape(tempEllipse);
                 tempEllipse = null;
             }
-            isDrawing.set(false);
+            isDrawing = false;
         });
     }
 

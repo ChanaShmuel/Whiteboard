@@ -40,6 +40,8 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
         colorPicker.setOnAction(actionEvent -> {
             drawBoard.setColor(colorPicker.getValue());
         });
+
+
         colorPicker.setMinHeight(MIN_HEIGHT);
         bar.getChildren().add(colorPicker);
 
@@ -70,7 +72,7 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
         new ShapeButton("icon/rectangle.png", DrawBoard.RECTANGLE);
         new ShapeButton("icon/ellipse.png", DrawBoard.Ellipse);
         new ShapeButton("icon/line.png", DrawBoard.LINE);
-        new ShapeButton("icon/point.png", DrawBoard.POINT);
+        ShapeButton circleButton = new ShapeButton("icon/point.png", DrawBoard.POINT);
         BarButton btnUndo = new BarButton("icon/undo.png");//this is UNDO
         btnUndo.setOnAction(actionEvent -> {
             if(root.getChildren().size() > 2) {//2 is the bar and the DrawBoard(white rectangle)
@@ -101,11 +103,11 @@ public class DrawScene extends Scene implements DrawBoard.Listener {
 
 
         //draw board:
-        drawBoard = new DrawBoard(root.getChildren(), this, server, username, password);
+        drawBoard = new DrawBoard(root.getChildren(), this, server, username, password, colorPicker);
         drawBoard.setColor(initialColor);
         drawBoard.setDimensions(this.getWidth(), this.getHeight());
         //root.getChildren().add(drawBoard);
-
+        circleButton.requestFocus();
 
 
 
